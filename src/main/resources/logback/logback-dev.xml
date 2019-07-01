@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration>
+
+	<springProperty scope="context" name="LOG_DIR" source="logging.root.dir" />
+	<springProperty scope="context" name="springAppName"
+		source="spring.application.name" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+
+	</appender>
+
+	<appender name="splunk"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR:-env/}splunk/splunk.log</file>
+		<append>true</append>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${LOG_DIR:-env/}splunk/splunk.%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>10</maxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>50MB</maxFileSize>
+		</triggeringPolicy>
+
+		<layout>
+			<pattern>{ "service": "${springAppName:-}", "correlationId":
+				"%X{X-B3-TraceId:-}", "span": "%X{X-B3-SpanId:-}", "parent":
+				"%X{X-B3-ParentSpanId:-}", "pid": "${PID:-}", "thread": "%thread",
+				"data" : %message, "stacktrace":
+				"%replace(%replace(%.1ex{0}%ex{50}){'[\r\n]+',
+				'--newline--'}){'[\t]+', ''}%nopex","date_time":"%d{yyyy-MM-dd
+				HH:mm:ss:SSS}", "log_level":"%p" }%n</pattern>
+		</layout>
+
+	</appender>
+
+	<appender name="app"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_DIR:-env/}garantia/app.log</file>
+		<append>true</append>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${LOG_DIR:-env/}garantia/app.%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>10</maxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy
+			class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>50MB</maxFileSize>
+		</triggeringPolicy>
+
+		<layout>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss:SSS} | %-5.5p | {%t} [%C] %F:%L |
+				%m%n</pattern>
+		</layout>
+
+	</appender>
+
+	<logger name="splunk">
+		<appender-ref ref="splunk" />
+	</logger>
+
+	<logger name="org.hibernate.SQL" level="debug">
+		<appender-ref ref="app" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.hibernate.type.descriptor.sql" level="trace">
+		<appender-ref ref="app" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+	<logger name="org.hibernate" level="info">
+		<appender-ref ref="app" />
+		<appender-ref ref="STDOUT" />
+	</logger>
+
+
+	<root level="warn">
+		<appender-ref ref="app" />
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

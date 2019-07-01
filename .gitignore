@@ -1,0 +1,15 @@
+/src/target/*
+.settings
+.classpath
+.project
+target/
+/testdb.db
+garantiadb.db
+mem
+
+bin/
+
+
+env/garantia/app.log 
+env/splunk/splunk.log
+/target/

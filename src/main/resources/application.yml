@@ -1,0 +1,40 @@
+
+spring:
+  
+  application:
+    name: spring-boot-microservice
+  
+  profiles:
+    active: local
+  
+  cloud:
+    discovery:
+      enabled: false
+    config: 
+      enabled: false
+      discovery: 
+        enabled: false
+  
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+        format_sql: true
+    show-sql: true
+    hibernate: 
+      ddl-auto: none
+  
+  datasource:
+    initialize: false
+
+##############################
+##### MICROSERVICE CONFIGS ###
+##############################
+info:
+  app:
+    name: Gatling Microservice Application
+    description: Microservico de exemplo para testes de carga
+    version: 1.0.0
+    
+logging.config: classpath:logback/logback-default.xml
