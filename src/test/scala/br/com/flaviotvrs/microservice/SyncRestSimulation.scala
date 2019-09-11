@@ -1,11 +1,11 @@
-package br.com.itau.comarhe.microservice
+package br.com.flaviotvrs.microservice
 
 import io.gatling.core.Predef._     // required for Gatling core structure DSL
 import io.gatling.http.Predef._     // required for Gatling HTTP DSL
 
 import scala.concurrent.duration._
 
-class AllGestoresGraphQLSimulation extends Simulation {
+class SyncRestSimulation extends Simulation {
 
   val rampUpTimeSecs = 5
   val testTimeSecs   = 300
@@ -14,29 +14,19 @@ class AllGestoresGraphQLSimulation extends Simulation {
   val maxWaitMs      = 300 milliseconds
 
   val baseURL		= "http://localhost:8080"
-  val baseName		= "EU7 repository API"
+  val baseName		= "Sync Rest"
   val requestName	= baseName + " - request"
   val scenarioName	= baseName + " - scenario"
-  val basicURI		= "/graphql"
-  val queryAllGestores			= "{ \"query\" : \"{ allGestores { id codigo nome cpf_cnpj } }\" }"
-  val queryAllGestoresAllFundos			= "{ \"query\" : \"{ allGestores { id codigo nome cpf_cnpj fundos { id codigo nome cnpj valor_cota data_cotacao patrimonio_liquido } } }\" }"
-
+  val basicURI		= "/api/service/sync"
+  val paramsRequest	= "?minMs=1&maxMs=500&successRatio=0.9"
 
   val httpConf = http.baseURL(baseURL)
 
-  val scn = scenario(scenarioName + "- GraphQL")
+  val scn = scenario(scenarioName + " - REST")
     .during(testTimeSecs) {
       exec(
-        http(requestName + " - all gestores")
-          .post(basicURI)
-          .body(StringBody(queryAllGestores))
-          .check(status.is(200))
-      )
-      .pause(minWaitMs, maxWaitMs)
-      .exec(
-        http(requestName + " - all gestores all fundos")
-          .post(basicURI)
-          .body(StringBody(queryAllGestoresAllFundos))
+        http(requestName)
+          .get(basicURI + paramsRequest)
           .check(status.is(200))
       )
       .pause(minWaitMs, maxWaitMs)
